@@ -2,3 +2,5 @@
 
 # Ignore env folder
 /env
+/venv
+/.idea
