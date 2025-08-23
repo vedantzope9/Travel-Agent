@@ -1,7 +1,10 @@
 import os
 from dotenv import load_dotenv
+from sympy.polys.polyconfig import query
+
 from tools.pexels_tool import PexelsSearchTool
 from tools.amadeus_tool import AmadeusScheduleTool
+from tools.railradar_tool import RailRadarSearchTool, RailRadarSearchParams
 from portia import (
     Config,
     LLMProvider,
@@ -15,7 +18,7 @@ load_dotenv()
 # Create Portia config
 google_config = Config.from_default(
     llm_provider=LLMProvider.GOOGLE,
-    default_model="google/gemini-2.5-pro",
+    default_model="google/gemini-2.5-flash",
     google_api_key=os.getenv('GOOGLE_API_KEY')
 )
 
@@ -28,7 +31,7 @@ flight_tool = AmadeusScheduleTool(
 
 # Use the SAME configured instance in registry
 
-all_custom_tools = [pexels_tool , flight_tool]
+all_custom_tools = [pexels_tool , flight_tool ]
 custom_registry = ToolRegistry(all_custom_tools)
 combined_registry = example_tool_registry + custom_registry
 
@@ -36,5 +39,8 @@ combined_registry = example_tool_registry + custom_registry
 portia = Portia(config=google_config, tools=combined_registry)
 
 # Run query
-result = portia.run( "Fetch  scheduled flights from BOM to BLR on 2025-08-27")
+# query = "Give flights from HYD to BLR on 2025-09-18 \n 2. give some images of places to visit in Bengaluru "
+
+query= "Give me information about places to visit in Pune and information about it \n 2. Give me images where to visit in Pune \n3. Search flight tickets from NGP to PNQ on 2025-09-18 "
+result = portia.run(query)
 print(result.outputs.final_output.value)

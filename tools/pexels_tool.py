@@ -1,4 +1,7 @@
+import os
 from typing import ClassVar, Tuple
+
+from openai import api_key
 from pydantic import BaseModel, Field
 import requests
 from portia import Tool, ToolRunContext
@@ -20,7 +23,7 @@ class PexelsSearchTool(Tool):
 
     def run(self, context: ToolRunContext, query: str) -> str:
         headers = {"Authorization": self.api_key}
-        url = f"https://api.pexels.com/v1/search?query={query}&per_page=5"
+        url = f"https://api.pexels.com/v1/search?query={query}&per_page=3"
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
@@ -28,8 +31,21 @@ class PexelsSearchTool(Tool):
         photos = results.get('photos', [])
 
         if photos:
-            urls = [photo['src']['medium'] for photo in photos[:5]]
+            urls = [photo['src']['medium'] for photo in photos[:3]]
             image_list = "\n".join([f"{i + 1}. {url}" for i, url in enumerate(urls)])
             return f"Found {len(urls)} images for '{query}':\n{image_list}"
         else:
             return f"No images found for '{query}' on Pexels"
+
+
+# #Testing code
+# class MockToolRunContext:
+#     pass
+#
+# api = os.getenv("PEXELS_API_KEY")
+# tool = PexelsSearchTool(api_key=api)
+# context = MockToolRunContext()
+#
+# query = "give some images of Bengaluru where I can travel"
+# result = tool.run(context, query)
+# print(result)
