@@ -39,8 +39,13 @@ combined_registry = example_tool_registry + custom_registry
 portia = Portia(config=google_config, tools=combined_registry)
 
 # Run query
-# query = "Give flights from HYD to BLR on 2025-09-18 \n 2. give some images of places to visit in Bengaluru "
+#query= "Give me information about places to visit in Bengaluru and information about it\n2. Why shou2. Using AmadeusScheduleTool:  Search flight tickets from DEL to BLR on 2025-09-18 \n 3. Give me images where to visit in Bengaluru and enjoy holidays "
 
-query= "Give me information about places to visit in Pune and information about it \n 2. Give me images where to visit in Pune \n3. Search flight tickets from NGP to PNQ on 2025-09-18 "
+query = """Give me a detailed travel guide for Mumbai covering the following:
+1. **Destination Overview**: Provide in-depth information about Mumbai, including its significance, tourist appeal, and the current live weather conditions.
+2. **Places to Visit**: List the top places to visit in Pune, explaining the significance and reasons why each is recommended for holiday travelers.
+3. **Flight Search**: Using AmadeusScheduleTool, search for flights from Delhi (DEL) to Bombay (BOM) for the journey date 2025-09-18 and show options with timings and estimated fares.
+4. **Images**: Fetch images of the recommended attractions and places to visit in Mumbai using PexelsSearchTool for a visual reference."""
+
 result = portia.run(query)
 print(result.outputs.final_output.value)
