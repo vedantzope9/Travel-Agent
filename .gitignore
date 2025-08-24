@@ -4,3 +4,6 @@
 /env
 /venv
 /.idea
+__pycache__/
+tools/__pycache__
+.portia/cache/

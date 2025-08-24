@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Travel-Agent — Flow UI ✈️</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<link rel="stylesheet" href="styles.css"> 
+</head>
+<body>
+
+<div class="blob a"></div>
+<div class="blob b"></div>
+
+<header>
+    <div class="nav">
+      <div class="brand"><i class="fa-solid fa-globe"></i><span>Travel-Agent</span></div>
+      <div class="tagline">Plan less, explore more — flights, places, experiences in seconds.</div>
+      <div class="nav-right">
+        <a class="gh-btn" href="https://github.com/vedantzope9/Travel-Agent" target="_blank"><i class="fa-brands fa-github"></i></a>
+      </div>
+    </div>
+  </header>
+
+<main>
+  <section class="hero">
+    <h1 class="headline">Plan smarter. Fly faster. Explore deeper.</h1>
+    <p class="sub">Just type your source and destination cities, pick your dates, and let Travel-Agent generate the perfect trip plan with highlights, flights, and stunning views.</p>
+    <div class="rule"></div>
+
+    <form id="tripForm" class="trip" autocomplete="off">
+      <div class="field">
+        <label for="source">Source</label>
+        <div class="input" id="source-wrapper"><i class="fa-solid fa-plane-departure"></i>
+          <input id="source" name="source" placeholder="Type city name (e.g., Pune)" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="destination">Destination</label>
+        <div class="input" id="dest-wrapper"><i class="fa-solid fa-plane-arrival"></i>
+          <input id="destination" name="destination" placeholder="Type city name (e.g., Bengaluru)" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="date">Date of Journey</label>
+        <div class="input"><i class="fa-regular fa-calendar"></i>
+          <input type="date" id="date" name="date" />
+        </div>
+      </div>
+
+      <div class="field">
+        <button class="btn" type="submit"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Plan</button>
+      </div>
+    </form>
+  </section>
+
+    <div id="loading" style="
+      display:none;
+      position:fixed;
+      top:0;left:0;width:100%;height:100%;
+      background:rgba(0,0,0,0.4);
+      z-index:9999;
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem;
+      color:white;
+  ">
+    <span>Loading...</span>
+  </div>
+
+  <!-- Results -->
+  <section id="highlightsSec" class="section">
+    <div class="title"><i class="fa-solid fa-location-dot" style="color:var(--accent)"></i><h2>Destination Highlights</h2></div>
+    <div id="highlights" class="highlights small"></div>
+  </section>
+
+  <section id="nearbySec" class="section">
+    <div class="title"><i class="fa-solid fa-map" style="color:var(--accent)"></i><h2>Nearby Places</h2></div>
+    <div id="nearby" class="chips"></div>
+  </section>
+
+  <section id="flightsSec" class="section">
+    <div class="title"><i class="fa-solid fa-ticket" style="color:var(--accent)"></i><h2>Flight Options</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Airline</th><th>Flight</th><th>Departure</th><th>Arrival</th><th>Duration</th><th>Price</th></tr></thead>
+        <tbody id="flightsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="gallerySec" class="section">
+    <div class="title"><i class="fa-solid fa-images" style="color:var(--accent)"></i><h2>Gallery</h2></div>
+    <div id="gallery" class="masonry"></div>
+  </section>
+</main>
+<div id="toast" style="
+    display:none;
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#333;
+    color:#fff;
+    padding:10px 20px;
+    border-radius:8px;
+    font-size:14px;
+    z-index:10000;
+">
+  Toast message here
+</div>
+
+<footer>
+    <p>
+      <a href="https://github.com/vedantzope9/Travel-Agent" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+      <a href="https://x.com/Vzope73"><i class="fa-brands fa-x-twitter"></i> X</a>
+    </p>
+  </footer>
+  
+  <script src="script.js"></script>
+</body>
+</html>
