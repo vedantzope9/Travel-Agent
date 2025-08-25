@@ -154,38 +154,18 @@ const indianCities = [
   document.getElementById('date').min = `${yyyy}-${mm}-${dd}`;
   
 
-  const API_TRAVEL = 'http://127.0.0.1:8000/travel-guide';
 
-//   async function fetchPlan({sourceCode, destinationCode, date}) {
-//     try {
-//       const res = await fetch(API_TRAVEL, {
-//         method: 'POST',
-//         headers: {'Content-Type': 'application/json'},
-//         body: JSON.stringify({
-//           source: sourceCode,
-//           destination: destinationCode,
-//           journey_date: date 
-//         })
-//       });
-//       console.log({ sourceCode, destinationCode, date });
-//       if (!res.ok) throw new Error('travel-guide endpoint not ok');
-//       return await res.json();
-//     } catch (e) {
-//       toast('Failed to fetch from /travel-guide', true);
-//       throw e;
-//     }
-//   }
 
 async function fetchTravelGuide(payload) {
-    const res = await fetch("http://127.0.0.1:8000/travel-guide", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    return data.result; // always JSON now
-  }
-  
+  const res = await fetch("http://127.0.0.1:8000/travel-guide", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  return parseApiResult(data);
+}
+
   
   
   function normalizeFromText(d){
@@ -243,8 +223,7 @@ async function fetchTravelGuide(payload) {
     });
   }
 
-  //Parse the Pi result
-
+  //Parse the APi result
   function parseApiResult(d) {
     let res = {
       info: "",
@@ -254,70 +233,48 @@ async function fetchTravelGuide(payload) {
     };
   
     try {
-      let parsed;
+      let parsed = typeof d === "string" ? JSON.parse(d) : d;
   
-      // If backend returned stringified JSON inside result
-      if (typeof d === "string") {
-        const cleaned = d.replace(/```json|```/g, "").trim();
-        parsed = JSON.parse(cleaned);
-      } else if (d.result && typeof d.result === "string") {
-        const cleaned = d.result.replace(/```json|```/g, "").trim();
-        parsed = JSON.parse(cleaned);
-      } else if (d.result && typeof d.result === "object") {
-        parsed = d.result;
-      } else {
-        parsed = d;
+      // Destination overview + weather
+      if (parsed.destination_overview) {
+        res.info += `${parsed.destination_overview.name}\n\n${parsed.destination_overview.description}\n\n`;
+        if (parsed.destination_overview.key_facts) {
+          res.info += "Key Facts:\n" + parsed.destination_overview.key_facts.map(f => "• " + f).join("\n") + "\n\n";
+        }
+      }
+      if (parsed.weather) {
+        res.info += `Weather in ${parsed.weather.location}: ${parsed.weather.current_conditions}, ${parsed.weather.temperature_celsius}°C\n`;
       }
   
-      // ✅ Destination info
-      if (parsed.destination) {
-        res.info = parsed.destination.overview || parsed.destination.description || "";
-      } else if (parsed["destination overview"]) {
-        res.info = parsed["destination overview"];
-      } else if (parsed.destination_name) {
-        res.info = parsed.destination_name;
+      // Attractions → nearby list
+      if (parsed.attractions) {
+        res.nearby = parsed.attractions.map(x => x.name || "");
       }
   
-      // ✅ Attractions / nearby
-      if (Array.isArray(parsed.attractions)) {
-        res.nearby = parsed.attractions.map(a => a.name || a.title || "").filter(Boolean);
-        parsed.attractions.forEach(a => {
-          if (a.images) res.images.push(...a.images);
-        });
-      }
-  
-      // ✅ Flights
-      if (Array.isArray(parsed.flights)) {
-        res.flights = parsed.flights.map(f => ({
-          airline: f.airline || "",
-          flight: f.flight_number || f.flight_no || "",
-          depart: f.departure || f.departure_time || f.depart || "",
-          arrive: f.arrival || f.arrival_time || f.arrive || "",
-          duration: f.duration || "",
-          price: f.price || f.fare || ""
+      // Flights
+      if (parsed.flights && parsed.flights.available_segments) {
+        res.flights = parsed.flights.available_segments.map(f => ({
+          airline: f.segment_origin + "→" + f.segment_destination,
+          flight_no: f.flight_number,
+          depart: f.departure,
+          arrive: f.arrival,
+          duration: "", // not provided in API response
+          price: f.price_eur ? `€${f.price_eur}` : ""
         }));
       }
   
-      // ✅ Weather (optional)
-      if (parsed.weather) {
-        if (typeof parsed.weather === "string") {
-          res.info += "\n\nWeather: " + parsed.weather;
-        } else if (parsed.weather.description) {
-          res.info += `\n\nWeather: ${parsed.weather.description}, ${parsed.weather.temperature || ""}`;
-        }
+      // Images (flatten all attraction images)
+      if (parsed.images) {
+        res.images = Object.values(parsed.images).flat();
       }
   
-      // ✅ Images
-      if (Array.isArray(parsed.images)) {
-        res.images.push(...parsed.images);
-      }
-  
-    } catch (err) {
-      console.error("Failed to parse API result as JSON:", err, d);
+    } catch (e) {
+      console.error("Failed to parse backend JSON:", e, d);
     }
   
     return res;
   }
+  
   
   
   
@@ -345,24 +302,26 @@ async function fetchTravelGuide(payload) {
     // show loading
     $('#loading').style.display = 'flex';
     try{
-        const res = await fetchTravelGuide({
-            source: sourceCode,
-            destination: destinationCode,
-            journey_date: date
-          });
-      // reveal sections
-      ['#highlightsSec','#nearbySec','#flightsSec','#gallerySec'].forEach(id => $(id).classList.add('revealed'));
-  
-      console.log(res);
-    let parsed = res;
-    if (res.result) {
-        parsed = parseApiResult(res);
-    }
-
+      const res = await fetchTravelGuide({
+        source: sourceCode,
+        destination: destinationCode,
+        journey_date: date
+    });
+    
+    // reveal sections
+    ['#highlightsSec','#nearbySec','#flightsSec','#gallerySec'].forEach(id => $(id).classList.add('revealed'));
+    
+    console.log("API raw response:", res);
+    
+    const parsed = parseApiResult(
+      
+    );
+    
     renderHighlights(parsed.info);
     renderNearby(parsed.nearby);
     renderFlights(parsed.flights);
     renderGallery(parsed.images);
+    
 
 
       confetti({particleCount:120,startVelocity:30,spread:70,origin:{y:.15}});

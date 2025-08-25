@@ -65,31 +65,6 @@ async def health_check():
     """Additional health check endpoint"""
     return {"status": "OK", "message": "Service is running"}
 
-#
-# @app.post("/travel-guide")
-# async def travel_guide(request: TravelRequest):
-#     """Generate a comprehensive travel guide"""
-#     if portia is None:
-#         raise HTTPException(status_code=500, detail="Service not properly initialized")
-#
-#     try:
-#         query = f"""
-#         Create a detailed travel guide covering the following:
-#
-#         1. **Destination Overview**: Provide information about {request.destination}, including its tourist appeal and live weather.
-#         2. **Places to Visit**: List the top attractions in {request.destination}, with significance.
-#         3. **Flight Search**: Using AmadeusScheduleTool, search flights from {request.source} to {request.destination} on {request.journey_date}, include timings and estimated fares.
-#         4. **Images**: Fetch images of attractions in {request.destination} using PexelsSearchTool.
-#         """
-#
-#         # Use asyncio.to_thread for the blocking operation
-#         result = await asyncio.to_thread(portia.run, query)
-#         return {"result": result.outputs.final_output.value}
-#
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error generating travel guide: {str(e)}"}
-
-
 @app.post("/travel-guide")
 async def travel_guide(request: TravelRequest):
     if portia is None:
